@@ -4,20 +4,20 @@ import http from 'k6/http';
 import { check } from 'k6';
 import { Trend, Rate } from 'k6/metrics';
 
-export const getContactsDuration = new Trend('get_contacts', true);
+export const getAdviceDuration = new Trend('get_advice', true);
 export const RateContentOK = new Rate('content_OK');
 
 export const options = {
   thresholds: {
     http_req_failed: ['rate<0.12'],
-    get_contacts: ['p(95)<5700'],
+    get_advice: ['p(95)<5700'],
     content_OK: ['rate>0.80']
   },
   stages: [
     { duration: '60s', target: 10 },
-    { duration: '60s', target: 25 },
     { duration: '60s', target: 50 },
     { duration: '60s', target: 100 },
+    { duration: '60s', target: 200 },
     { duration: '60s', target: 300 }
   ]
 };
@@ -42,11 +42,11 @@ export default function () {
 
   const res = http.get(`${baseUrl}`, params);
 
-  getContactsDuration.add(res.timings.duration);
+  getAdviceDuration.add(res.timings.duration);
 
   RateContentOK.add(res.status === OK);
 
   check(res, {
-    'GET Contacts - Status 200': () => res.status === OK
+    'GET Advice': () => res.status === OK
   });
 }
